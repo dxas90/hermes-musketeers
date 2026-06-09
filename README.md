@@ -30,7 +30,7 @@ And four ready-to-use workflows via skills:
 ## Installation
 
 ```bash
-hermes profile install github.com/dxas90/hermes-musketeers --alias musketeers
+hermes profile install github.com/dxas90/hermes-musketeers --alias
 ```
 
 Then start it:
