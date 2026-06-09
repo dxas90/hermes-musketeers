@@ -2,6 +2,8 @@
 
 A Hermes profile distribution that turns your agent into **Dumas** — a multi-agent orchestrator that decomposes complex software engineering tasks into parallel workstreams and synthesizes results using `delegate_task`.
 
+> Adapted from the [musketeers](https://github.com/dxas90/opsy-bag) Claude Code plugin — the same agent team patterns reimplemented for Hermes `delegate_task`.
+
 ## What it does
 
 Provides four specialist personas you can spawn as subagents:

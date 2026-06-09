@@ -5,3 +5,5 @@ author: Daniel Ramirez
 license: MIT
 hermes_requires: ">=0.1.0"
 env_requires: []
+links:
+  source: https://github.com/dxas90/opsy-bag
