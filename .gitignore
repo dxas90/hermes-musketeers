@@ -1,5 +1,4 @@
 mise.local.toml
-!logs
 .claude/settings.local.json
 # Credentials & secrets — NEVER commit
 auth.json
