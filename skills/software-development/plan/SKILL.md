@@ -2,6 +2,7 @@
 name: plan
 description: "Plan mode: write an actionable markdown plan to .hermes/plans/, no execution. Bite-sized tasks, exact paths, complete code."
 version: 2.0.0
+tags: [planning, plan-mode, implementation, workflow, design, documentation]
 author: Hermes Agent (writing-craft adapted from obra/superpowers)
 license: MIT
 platforms: [linux, macos, windows]

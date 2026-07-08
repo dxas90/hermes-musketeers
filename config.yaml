@@ -445,7 +445,7 @@ security:
   allow_lazy_installs: true
 cron:
   wrap_response: true
-  max_parallel_jobs:
+  max_parallel_jobs: 4
 kanban:
   dispatch_in_gateway: true
   dispatch_interval_seconds: 60

@@ -151,3 +151,30 @@ delegate_task(
   toolsets=["terminal", "file"]
 )
 ```
+
+## Rollback Strategy
+
+When integration fails after all streams complete:
+
+### 1. Identify the Failure Boundary
+- Run integration tests and capture the exact failure
+- Determine which stream's output is incompatible
+
+### 2. Targeted Rework (Prefer Over Full Rollback)
+- Assign only the conflicting stream to a new Aramis with an updated interface contract
+- Other streams remain as-is
+
+### 3. Full Rollback (Last Resort)
+```bash
+git stash        # if uncommitted changes
+git reset --soft HEAD~1  # undo merge commit, keep changes staged
+```
+- Re-plan the decomposition with tighter interface contracts
+- Consider sequential (not parallel) implementation if conflicts persist
+
+### 4. Post-Mortem Before Re-running
+Before re-spawning implementers:
+- [ ] Root cause of integration failure identified
+- [ ] Interface contracts updated to prevent recurrence
+- [ ] File ownership re-validated (no shared files)
+```

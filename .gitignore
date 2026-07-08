@@ -39,7 +39,6 @@ cache/
 hermes-agent/
 .worktrees/
 profiles/
-bin/
 node_modules/
 
 # User customization namespace — your local overrides

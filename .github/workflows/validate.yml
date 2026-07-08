@@ -1,0 +1,62 @@
+name: Validate Profile
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate YAML files
+        run: |
+          pip install yamllint --quiet
+          yamllint -d relaxed distribution.yaml config.yaml skins/musketeers.yaml
+
+      - name: Check SKILL.md frontmatter
+        run: |
+          python3 - <<'EOF'
+          import os, sys, re
+
+          errors = []
+          required = {'name', 'description', 'version', 'tags'}
+
+          for root, dirs, files in os.walk('skills'):
+              for f in files:
+                  if f != 'SKILL.md':
+                      continue
+                  path = os.path.join(root, f)
+                  with open(path) as fh:
+                      content = fh.read()
+                  if not content.startswith('---'):
+                      errors.append(f'{path}: missing YAML frontmatter')
+                      continue
+                  m = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+                  if not m:
+                      errors.append(f'{path}: malformed frontmatter (no closing ---)')
+                      continue
+                  fm = m.group(1)
+                  found = set(re.findall(r'^(\w+):', fm, re.MULTILINE))
+                  missing = required - found
+                  if missing:
+                      errors.append(f'{path}: missing fields: {missing}')
+
+          if errors:
+              for e in errors:
+                  print(f'ERROR: {e}', file=sys.stderr)
+              sys.exit(1)
+          print('All SKILL.md files pass frontmatter validation.')
+          EOF
+
+      - name: Check no secrets in tracked files
+        run: |
+          if grep -rE '(api_key|secret|password|token)\s*=\s*["\x27][^"\x27]{8,}["\x27]' \
+               --include='*.yaml' --include='*.md' --include='*.json' .; then
+            echo 'ERROR: Potential secret found in tracked file' >&2
+            exit 1
+          fi
+          echo 'No secrets detected.'

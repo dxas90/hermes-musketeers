@@ -111,3 +111,15 @@ After all investigators report:
 | **Correlating**| Medium   | Recent commit changed the suspected area           |
 | **Absence**    | Medium   | Expected validation is missing                     |
 | **Inferential**| Weak     | Similar pattern caused bugs elsewhere              |
+
+### Low-Confidence Escalation
+
+When ALL investigators return Low confidence (<50%):
+
+1. **Do not guess** — present the evidence gap honestly
+2. **Request instrumentation**: Ask the user to add logging at key boundaries
+3. **Reduce scope**: Ask the user for a minimal reproduction case
+4. **Widen hypotheses**: Generate 2 additional hypotheses from uncovered categories
+5. **Escalate if still stuck**: Report the investigation results and ask the user what additional context they can provide
+
+Never present a Low-confidence winner as the root cause. Always flag confidence explicitly.

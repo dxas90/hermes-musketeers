@@ -105,3 +105,11 @@ After all reviewers complete:
 | **High**     | Significant risk, major perf issue, broken contract | Fix before merge   |
 | **Medium**   | Code smell, minor risk, suboptimal pattern          | Fix or justify     |
 | **Low**      | Nit, style preference, minor improvement            | Optional fix       |
+
+## Pitfalls
+
+- **Reviewer modifying files** — Reviewers are read-only. If a reviewer proposes a fix, that is a suggestion only. Implementation is separate.
+- **Overlapping findings** — When 2+ reviewers flag the same line, deduplicate and credit all dimensions. Do not report the same issue twice.
+- **Severity inflation** — Not every issue is Critical. Reserve Critical for exploitable or data-loss issues only.
+- **Missing file:line** — Any finding without a file:line citation should be treated as Low severity regardless of the reviewer's stated severity.
+- **Reviewer times out** — If one reviewer times out, proceed with remaining results; note the missing dimension in the report header.

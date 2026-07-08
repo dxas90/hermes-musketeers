@@ -26,9 +26,12 @@ And six ready-to-use workflow skills:
 
 Plus complementary skills:
 
-- **`systematic-debugging`** — single-agent 4-phase root cause analysis
-- **`requesting-code-review`** — pre-commit verification pipeline
-- **`plan`** — upfront decomposition before implementation
+| Skill | Description |
+|---|---|
+| **`systematic-debugging`** | single-agent 4-phase root cause analysis |
+| **`requesting-code-review`** | pre-commit verification pipeline |
+| **`plan`** | upfront decomposition before implementation |
+| **`jira-cli`** | Atlassian/Jira CLI reference (acli commands, JQL, transitions) |
 
 ## Requirements
 
@@ -124,12 +127,38 @@ Or load a skill explicitly:
 │   │   ├── requesting-code-review/  # Pre-commit review
 │   │   ├── systematic-debugging/    # Root cause analysis
 │   │   └── plan/                    # Plan-before-build
-│   └── devops/
-│       ├── musketeers-orchestration/ # Team composition & coordination
-│       └── musketeers-workspace/    # Cross-repo task tracking
+│   ├── devops/
+│   │   ├── musketeers-orchestration/ # Team composition & coordination
+│   │   └── musketeers-workspace/    # Cross-repo task tracking
+│   └── productivity/
+│       └── jira-cli/
 ├── cron/
 └── hooks/
 ```
+
+## Contributing
+
+1. Fork the repo and create a `feat/<description>` branch.
+2. Make your changes. Skill files must have valid YAML frontmatter (`name`, `description`, `version`, `tags`).
+3. Test skill changes by loading them in a live session: `/skill <name>`
+4. Open a PR against `main` — CI validates YAML and frontmatter automatically.
+
+## Troubleshooting
+
+**`hermes profile install` fails**
+Ensure git is installed and you have network access. Try:
+```bash
+hermes profile install github.com/dxas90/hermes-musketeers --alias musketeers
+```
+
+**Subagents not spawning**
+Ensure `delegation.max_concurrent_children: 3` (or higher) is set in `config.yaml` and you have a valid API key configured for your provider.
+
+**Skin not applying**
+Run `hermes config set display.skin musketeers` or verify `display.skin: musketeers` is present in `config.yaml`. Restart the agent after changes.
+
+**Wrong model being used**
+Update `model.default` and `model.provider` in `config.yaml`. Restart the agent after changes.
 
 ## License
 

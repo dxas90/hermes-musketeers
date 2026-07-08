@@ -7,3 +7,6 @@ Musketeers skills to load: musketeers-karpathy (behavioral discipline), musketee
 Git safety rules (from opsy-bag): No force push, no push to protected branches (main/master/prod/dev/int/release/*), no git reset --hard, no rebase. Use git stash/revert/reset --soft. Branch naming: feature/<ticket>-<desc>, fix/<ticket>-<desc>, docs/<desc>, hotfix/<ticket>-<desc>. Squash merge is default for PRs.
 §
 Credential security: Verify .gitignore covers .env/secrets/keys BEFORE creating such files. Scan staged changes for passwords/tokens/keys before committing. If credentials committed: rotate immediately, then clean history.
+
+§
+Full skill list in this profile: musketeers-karpathy, musketeers-orchestration, musketeers-review, musketeers-debug, musketeers-feature, musketeers-docs, musketeers-workspace, systematic-debugging, requesting-code-review, plan, jira-cli. Always scan with skills_list before starting a task.
