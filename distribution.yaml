@@ -1,5 +1,5 @@
 name: musketeers
-version: 1.0.0
+version: 1.0.1
 description: "Multi-agent orchestrator that decomposes complex software engineering tasks into parallel workstreams using delegate_task. Includes specialist personas for code review (Athos), debugging (Porthos), feature building (Aramis), and documentation (DArtagnan)."
 author: Daniel Ramirez
 license: MIT

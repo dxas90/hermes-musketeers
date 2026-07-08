@@ -15,11 +15,19 @@ Provides four specialist personas you can spawn as subagents:
 | **Aramis** | Feature builder — implements within strict file ownership boundaries | read-write |
 | **DArtagnan** | Documentation specialist — reads source to write accurate docs | read-write |
 
-And four ready-to-use workflows via skills:
+And six ready-to-use workflow skills:
 
-- **`musketeers`** — parallel code review, hypothesis debugging, feature builds, docs generation
-- **`requesting-code-review`** — pre-commit verification pipeline with independent reviewer subagent
-- **`systematic-debugging`** — structured root cause analysis
+- **`musketeers-karpathy`** — behavioral discipline (think first, simplicity, surgical changes)
+- **`musketeers-orchestration`** — team composition, sizing, delegation templates
+- **`musketeers-review`** — parallel code review across quality dimensions
+- **`musketeers-debug`** — hypothesis-driven parallel debugging (ACH methodology)
+- **`musketeers-feature`** — parallel feature development with file ownership
+- **`musketeers-docs`** — documentation generation via DArtagnan
+
+Plus complementary skills:
+
+- **`systematic-debugging`** — single-agent 4-phase root cause analysis
+- **`requesting-code-review`** — pre-commit verification pipeline
 - **`plan`** — upfront decomposition before implementation
 
 ## Requirements
@@ -102,19 +110,23 @@ Or load a skill explicitly:
 ├── distribution.yaml                # Distribution manifest
 ├── SOUL.md                          # Dumas persona — the orchestrator identity
 ├── config.yaml                      # Model, provider, delegation settings
+├── skins/
+│   └── musketeers.yaml              # Custom theme (gold/bronze, ASCII hero)
+├── memories/
+│   └── MEMORY.md                    # Persistent facts (team structure, git rules)
 ├── skills/
 │   ├── software-development/
-│   │   ├── musketeers/              # Main skill — all four workflows
-│   │   │   ├── SKILL.md
-│   │   │   └── references/
-│   │   │       ├── team-review.md
-│   │   │       ├── parallel-debugging.md
-│   │   │       └── parallel-feature.md
-│   │   ├── requesting-code-review/
-│   │   ├── systematic-debugging/
-│   │   └── plan/
-│   └── autonomous-ai-agents/
-│       └── hermes-agent/
+│   │   ├── musketeers-karpathy/     # Behavioral guidelines
+│   │   ├── musketeers-review/       # Parallel code review (Athos)
+│   │   ├── musketeers-debug/        # Hypothesis debugging (Porthos)
+│   │   ├── musketeers-feature/      # Parallel builds (Aramis)
+│   │   ├── musketeers-docs/         # Documentation (DArtagnan)
+│   │   ├── requesting-code-review/  # Pre-commit review
+│   │   ├── systematic-debugging/    # Root cause analysis
+│   │   └── plan/                    # Plan-before-build
+│   └── devops/
+│       ├── musketeers-orchestration/ # Team composition & coordination
+│       └── musketeers-workspace/    # Cross-repo task tracking
 ├── cron/
 └── hooks/
 ```

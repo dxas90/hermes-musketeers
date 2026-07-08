@@ -24,7 +24,7 @@ agent:
   image_input_mode: auto
   disabled_toolsets: []
   verbose: false
-  reasoning_effort: medium
+  reasoning_effort: high
   personalities:
     helpful: You are a helpful, friendly AI assistant.
     concise: You are a concise assistant. Keep responses brief and to the point.
@@ -119,98 +119,98 @@ openrouter:
   response_cache_ttl: 300
   min_coding_score: 0.65
 bedrock:
-  region: ""
+  region: ''
   discovery:
     enabled: true
     provider_filter: []
     refresh_interval: 3600
   guardrail:
-    guardrail_identifier: ""
-    guardrail_version: ""
+    guardrail_identifier: ''
+    guardrail_version: ''
     stream_processing_mode: async
     trace: disabled
 auxiliary:
   vision:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 120
     extra_body: {}
     download_timeout: 30
   web_extract:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 360
     extra_body: {}
   compression:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 120
     extra_body: {}
   skills_hub:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 30
     extra_body: {}
   approval:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 30
     extra_body: {}
   mcp:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 30
     extra_body: {}
   title_generation:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 30
     extra_body: {}
   triage_specifier:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 120
     extra_body: {}
   kanban_decomposer:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 180
     extra_body: {}
   profile_describer:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 60
     extra_body: {}
   curator:
     provider: auto
-    model: ""
-    base_url: ""
-    api_key: ""
+    model: ''
+    base_url: ''
+    api_key: ''
     timeout: 600
     extra_body: {}
 display:
   compact: false
-  personality: ""
+  personality: ''
   resume_display: full
   resume_exchanges: 10
   resume_max_user_chars: 300
@@ -232,7 +232,7 @@ display:
   file_mutation_verifier: true
   turn_completion_explainer: true
   show_cost: false
-  skin: default
+  skin: musketeers
   language: en
   tui_status_indicator: kaomoji
   user_message_preview:
@@ -264,15 +264,15 @@ dashboard:
   theme: default
   show_token_analytics: false
   oauth:
-    client_id: ""
-    portal_url: ""
+    client_id: ''
+    portal_url: ''
   basic_auth:
-    username: ""
-    password_hash: ""
-    password: ""
-    secret: ""
+    username: ''
+    password_hash: ''
+    password: ''
+    secret: ''
     session_ttl_seconds: 0
-  public_url: ""
+  public_url: ''
 privacy:
   redact_pii: false
 tts:
@@ -294,8 +294,8 @@ tts:
     model: voxtral-mini-tts-2603
     voice_id: c69964a6-ab8b-4f8a-9465-ec0925096ec8
   neutts:
-    ref_audio: ""
-    ref_text: ""
+    ref_audio: ''
+    ref_text: ''
     model: neuphonic/neutts-air-q4-gguf
     device: cpu
   piper:
@@ -305,14 +305,14 @@ stt:
   provider: local
   local:
     model: base
-    language: ""
+    language: ''
   openai:
     model: whisper-1
   mistral:
     model: voxtral-mini-latest
   elevenlabs:
     model_id: scribe_v2
-    language_code: ""
+    language_code: ''
     tag_audio_events: false
     diarize: false
 voice:
@@ -323,7 +323,7 @@ voice:
   silence_threshold: 200
   silence_duration: 3.0
 human_delay:
-  mode: "off"
+  mode: 'off'
   min_ms: 800
   max_ms: 2500
 context:
@@ -333,24 +333,24 @@ memory:
   user_profile_enabled: true
   memory_char_limit: 2200
   user_char_limit: 1375
-  provider: ""
+  provider: ''
   nudge_interval: 10
   flush_min_turns: 6
 delegation:
-  model: ""
-  provider: ""
-  base_url: ""
-  api_key: ""
-  api_mode: ""
+  model: ''
+  provider: ''
+  base_url: ''
+  api_key: ''
+  api_mode: ''
   inherit_mcp_toolsets: true
   max_iterations: 50
-  child_timeout_seconds: 600
-  reasoning_effort: ""
+  child_timeout_seconds: 900
+  reasoning_effort: high
   max_concurrent_children: 3
   max_spawn_depth: 1
   orchestrator_enabled: true
   subagent_auto_approve: false
-prefill_messages_file: ""
+prefill_messages_file: ''
 goals:
   max_turns: 20
 skills:
@@ -371,30 +371,30 @@ curator:
     enabled: true
     keep: 5
 honcho: {}
-timezone: ""
+timezone: ''
 slack:
   require_mention: true
-  free_response_channels: ""
-  allowed_channels: ""
+  free_response_channels: ''
+  allowed_channels: ''
   channel_prompts: {}
 discord:
   require_mention: true
-  free_response_channels: ""
-  allowed_channels: ""
+  free_response_channels: ''
+  allowed_channels: ''
   auto_thread: true
   thread_require_mention: false
   history_backfill: true
   history_backfill_limit: 50
   reactions: true
   channel_prompts: {}
-  dm_role_auth_guild: ""
-  server_actions: ""
+  dm_role_auth_guild: ''
+  server_actions: ''
   allow_any_attachment: false
   max_attachment_bytes: 33554432
   voice_fx:
     enabled: false
     ambient_enabled: true
-    ambient_path: ""
+    ambient_path: ''
     ambient_gain: 0.18
     duck_gain: 0.06
     speech_gain: 1.0
@@ -409,16 +409,16 @@ whatsapp: {}
 telegram:
   reactions: false
   channel_prompts: {}
-  allowed_chats: ""
+  allowed_chats: ''
 mattermost:
   require_mention: true
-  free_response_channels: ""
-  allowed_channels: ""
+  free_response_channels: ''
+  allowed_channels: ''
   channel_prompts: {}
 matrix:
   require_mention: true
-  free_response_rooms: ""
-  allowed_rooms: ""
+  free_response_rooms: ''
+  allowed_rooms: ''
 approvals:
   mode: manual
   timeout: 60
@@ -445,16 +445,16 @@ security:
   allow_lazy_installs: true
 cron:
   wrap_response: true
-  max_parallel_jobs: null
+  max_parallel_jobs:
 kanban:
   dispatch_in_gateway: true
   dispatch_interval_seconds: 60
   failure_limit: 2
   worker_log_rotate_bytes: 2097152
   worker_log_backup_count: 1
-  orchestrator_profile: ""
-  default_assignee: ""
-  max_in_progress_per_profile: null
+  orchestrator_profile: ''
+  default_assignee: ''
+  max_in_progress_per_profile:
   auto_decompose: true
   auto_decompose_per_tick: 3
   dispatch_stale_timeout_seconds: 14400
@@ -489,7 +489,7 @@ streaming:
   transport: auto
   edit_interval: 0.8
   buffer_threshold: 24
-  cursor: " \u2589"
+  cursor: ' ▉'
   fresh_final_after_seconds: 60.0
 sessions:
   auto_prune: false
@@ -498,7 +498,9 @@ sessions:
   min_interval_hours: 24
   write_json_snapshots: false
 onboarding:
-  seen: {}
+  seen:
+    busy_input_prompt: true
+    tool_progress_prompt: true
   profile_build: ask
 updates:
   pre_update_backup: false
@@ -518,11 +520,11 @@ secrets:
   bitwarden:
     enabled: false
     access_token_env: BWS_ACCESS_TOKEN
-    project_id: ""
+    project_id: ''
     cache_ttl_seconds: 300
     override_existing: true
     auto_install: true
-    server_url: ""
+    server_url: ''
 paste_collapse_threshold: 5
 paste_collapse_threshold_fallback: 5
 paste_collapse_char_threshold: 2000
