@@ -110,6 +110,50 @@ After all delegates complete:
 4. **Cross-reference** — Note findings that span multiple dimensions
 5. **Gap analysis** — Identify areas with insufficient coverage
 
+## Error Handling & Retry Patterns
+
+### Retry Policy
+
+For transient delegate failures, use bounded retries:
+
+| Parameter | Default | Rule |
+|---|---|---|
+| **Max attempts** | 2 | Original + 1 retry |
+| **Backoff** | Small delay between attempts | Do not spam retries |
+| **Allowed cases** | Timeouts, empty output, transient tool errors | Not logic/acceptance failures |
+
+### Timeout Handling
+
+- Prefer shorter, scoped tasks over long-running delegates.
+- If a delegate times out:
+  1. Classify the missing result as partial
+  2. Retry once with tighter scope or reduced files
+  3. If still missing, proceed with degraded synthesis if safe
+
+### Degraded Synthesis
+
+When one delegate fails after retries:
+
+- **Do not block the whole workflow** if remaining delegates cover the critical path.
+- Mark the missing dimension explicitly in the final report.
+- Prefer completeness with one gap over full failure.
+
+### Abort / Replan Criteria
+
+Stop and replan instead of retrying when:
+
+- A delegate fails due to acceptance-criteria mismatch, not execution error
+- File ownership conflict is detected mid-stream
+- Interface contract is broken by another delegate’s output
+
+### Synthesis With Missing Results
+
+If some delegates never return:
+
+1. Use available results
+2. Flag missing coverage explicitly
+3. Recommend a follow-up task for the missing dimension instead of fabricating findings
+
 ## Communication Anti-Patterns
 
 | Anti-Pattern                     | Problem                              | Better                                |

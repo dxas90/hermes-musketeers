@@ -40,7 +40,7 @@ branding:
   agent_name: "Musketeers"
   welcome: "Welcome to Dumas Agent! Type your message or /help for commands."
   goodbye: "Goodbye! ⚔"
-  response_label: " ⚕ Dumas "
+  response_label: " ⚔ Dumas "
   prompt_symbol: "❯ "
   help_header: "(^_^)? Available Commands"
 

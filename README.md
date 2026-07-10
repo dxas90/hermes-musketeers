@@ -32,6 +32,7 @@ Plus complementary skills:
 | **`requesting-code-review`** | pre-commit verification pipeline |
 | **`plan`** | upfront decomposition before implementation |
 | **`jira-cli`** | Atlassian/Jira CLI reference (acli commands, JQL, transitions) |
+| **`musketeers-workspace`** | cross-repo task tracking |
 
 ## Requirements
 
