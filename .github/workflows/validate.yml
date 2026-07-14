@@ -23,7 +23,7 @@ jobs:
           import os, sys, re
 
           errors = []
-          required = {'name', 'description', 'version', 'tags'}
+          required = {'name', 'description', 'version', 'metadata'}
 
           for root, dirs, files in os.walk('skills'):
               for f in files:
