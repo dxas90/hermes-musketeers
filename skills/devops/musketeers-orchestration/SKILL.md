@@ -2,7 +2,6 @@
 name: musketeers-orchestration
 description: "Team composition patterns, sizing heuristics, task coordination strategies, and communication protocols for multi-agent Musketeers workflows. Load when spawning teams, delegating work, or managing parallel workstreams."
 version: 1.0.0
-tags: [musketeers, orchestration, teams, delegation, coordination]
 author: Hermes Agent
 license: MIT
 metadata:

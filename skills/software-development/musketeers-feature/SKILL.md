@@ -2,7 +2,6 @@
 name: musketeers-feature
 description: "Parallel feature development with file ownership boundaries, interface contracts, and multi-agent implementation (Aramis). Load when building features that can be decomposed into parallel work streams."
 version: 1.0.0
-tags: [musketeers, feature, aramis, parallel, implementation]
 author: Hermes Agent
 license: MIT
 metadata:

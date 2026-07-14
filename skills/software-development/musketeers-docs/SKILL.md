@@ -2,7 +2,6 @@
 name: musketeers-docs
 description: "Documentation generation via DArtagnan — README, API references, architecture guides, setup guides, troubleshooting. Load when the user needs documentation written or updated based on existing code."
 version: 1.0.0
-tags: [musketeers, docs, dartagnan, documentation, writing]
 author: Hermes Agent
 license: MIT
 metadata:

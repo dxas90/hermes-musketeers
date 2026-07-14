@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch: {}
 
 jobs:
   validate:
@@ -12,51 +13,174 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate YAML files
+      # ── 1. YAML lint ─────────────────────────────────────────────────────────
+      - name: Lint YAML files
         run: |
           pip install yamllint --quiet
           yamllint -d relaxed distribution.yaml config.yaml skins/musketeers.yaml
 
-      - name: Check SKILL.md frontmatter
+      # ── 2. distribution.yaml required fields ────────────────────────────────
+      - name: Validate distribution.yaml
         run: |
           python3 - <<'EOF'
-          import os, sys, re
+          import sys, yaml, pathlib
+
+          required = {"name", "version", "description", "author", "license", "hermes_requires"}
+          path = pathlib.Path("distribution.yaml")
+          data = yaml.safe_load(path.read_text())
+          if not isinstance(data, dict):
+              print("ERROR: distribution.yaml is not a YAML mapping", file=sys.stderr)
+              sys.exit(1)
+          missing = required - set(data.keys())
+          if missing:
+              print(f"ERROR: distribution.yaml missing fields: {missing}", file=sys.stderr)
+              sys.exit(1)
+          print("distribution.yaml OK")
+          EOF
+
+      # ── 3. SKILL.md frontmatter validation ──────────────────────────────────
+      - name: Validate SKILL.md frontmatter
+        run: |
+          pip install pyyaml --quiet
+          python3 - <<'EOF'
+          import os, sys, re, yaml, pathlib
+
+          MAX_NAME_LENGTH = 64
+          MAX_DESCRIPTION_LENGTH = 1024
+          MAX_SKILL_CONTENT_CHARS = 100_000
+          NAME_RE = re.compile(r'^[a-z][a-z0-9-_]*$')
 
           errors = []
-          required = {'name', 'description', 'version', 'metadata'}
 
           for root, dirs, files in os.walk('skills'):
               for f in files:
                   if f != 'SKILL.md':
                       continue
                   path = os.path.join(root, f)
-                  with open(path) as fh:
-                      content = fh.read()
+                  content = pathlib.Path(path).read_text()
+
+                  # ── Must start exactly at byte 0 with ---
                   if not content.startswith('---'):
-                      errors.append(f'{path}: missing YAML frontmatter')
+                      errors.append(f'{path}: frontmatter must start at byte 0 with ---')
                       continue
-                  m = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+
+                  # ── Find closing ---
+                  m = re.match(r'^---\n(.*?)\n---\s*\n', content, re.DOTALL)
                   if not m:
-                      errors.append(f'{path}: malformed frontmatter (no closing ---)')
+                      errors.append(f'{path}: malformed frontmatter (no closing ---\\n)')
                       continue
-                  fm = m.group(1)
-                  found = set(re.findall(r'^(\w+):', fm, re.MULTILINE))
-                  missing = required - found
-                  if missing:
-                      errors.append(f'{path}: missing fields: {missing}')
+
+                  fm_raw = m.group(1)
+                  body = content[m.end():]
+
+                  if not body.strip():
+                      errors.append(f'{path}: empty body after frontmatter')
+                      continue
+
+                  # ── Parse YAML properly (not regex)
+                  try:
+                      fm = yaml.safe_load(fm_raw)
+                  except yaml.YAMLError as e:
+                      errors.append(f'{path}: frontmatter YAML parse error: {e}')
+                      continue
+
+                  if not isinstance(fm, dict):
+                      errors.append(f'{path}: frontmatter is not a YAML mapping')
+                      continue
+
+                  # ── Required scalar fields
+                  for field in ('name', 'description', 'version', 'author', 'license'):
+                      if field not in fm:
+                          errors.append(f'{path}: missing required field: {field}')
+                      elif not isinstance(fm[field], str) or not fm[field].strip():
+                          errors.append(f'{path}: field "{field}" must be a non-empty string')
+
+                  # ── name constraints
+                  name = fm.get('name', '')
+                  if isinstance(name, str) and name:
+                      if len(name) > MAX_NAME_LENGTH:
+                          errors.append(f'{path}: name "{name}" exceeds {MAX_NAME_LENGTH} chars ({len(name)})')
+                      if not NAME_RE.match(name):
+                          errors.append(f'{path}: name "{name}" must be lowercase letters/digits/hyphens/underscores')
+                      # directory name should match skill name
+                      skill_dir = os.path.basename(root)
+                      if skill_dir != name:
+                          errors.append(f'{path}: directory "{skill_dir}" does not match skill name "{name}"')
+
+                  # ── description length
+                  desc = fm.get('description', '')
+                  if isinstance(desc, str) and len(desc) > MAX_DESCRIPTION_LENGTH:
+                      errors.append(f'{path}: description exceeds {MAX_DESCRIPTION_LENGTH} chars ({len(desc)})')
+
+                  # ── metadata.hermes block
+                  meta = fm.get('metadata')
+                  if not isinstance(meta, dict) or 'hermes' not in meta:
+                      errors.append(f'{path}: missing metadata.hermes block')
+                  else:
+                      hermes_meta = meta['hermes']
+                      if not isinstance(hermes_meta, dict):
+                          errors.append(f'{path}: metadata.hermes must be a mapping')
+                      else:
+                          tags = hermes_meta.get('tags')
+                          if not tags or not isinstance(tags, list) or len(tags) == 0:
+                              errors.append(f'{path}: metadata.hermes.tags must be a non-empty list')
+                          related = hermes_meta.get('related_skills')
+                          if related is not None and not isinstance(related, list):
+                              errors.append(f'{path}: metadata.hermes.related_skills must be a list if present')
+
+                  # ── No top-level tags: or platforms: (non-standard fields)
+                  if 'tags' in fm:
+                      errors.append(f'{path}: found top-level "tags:" field — move tags to metadata.hermes.tags')
+                  if 'platforms' in fm:
+                      errors.append(f'{path}: found top-level "platforms:" field — not part of Hermes skill schema')
+
+                  # ── Total file size
+                  if len(content) > MAX_SKILL_CONTENT_CHARS:
+                      errors.append(f'{path}: file size {len(content)} chars exceeds {MAX_SKILL_CONTENT_CHARS} limit')
 
           if errors:
               for e in errors:
                   print(f'ERROR: {e}', file=sys.stderr)
               sys.exit(1)
-          print('All SKILL.md files pass frontmatter validation.')
+          print(f'All SKILL.md files pass validation.')
           EOF
 
+      # ── 4. Secret / credential scan ─────────────────────────────────────────
       - name: Check no secrets in tracked files
         run: |
-          if grep -rE '(api_key|secret|password|token)\s*=\s*["\x27][^"\x27]{8,}["\x27]' \
-               --include='*.yaml' --include='*.md' --include='*.json' .; then
+          # Pattern: assignment-style secrets with 8+ char values (quoted)
+          if git grep -nE \
+               '(api_key|api_secret|secret_key|password|passwd|token|private_key)\s*[=:]\s*["'"'"'][^"'"'"']{8,}["'"'"']' \
+               -- '*.yaml' '*.yml' '*.md' '*.json' '*.toml'; then
             echo 'ERROR: Potential secret found in tracked file' >&2
             exit 1
           fi
-          echo 'No secrets detected.'
+          echo 'Secret scan: clean'
+
+      # ── 5. Skill directory structure check ──────────────────────────────────
+      - name: Check skill directory layout
+        run: |
+          python3 - <<'EOF'
+          import os, sys, pathlib
+
+          allowed_subdirs = {'references', 'templates', 'scripts', 'assets'}
+          errors = []
+
+          for root, dirs, files in os.walk('skills'):
+              depth = root.count(os.sep) - 'skills'.count(os.sep)
+              if depth == 2:
+                  # This is a skill directory (skills/<category>/<name>/)
+                  # Must contain SKILL.md
+                  if 'SKILL.md' not in files:
+                      errors.append(f'{root}: skill directory is missing SKILL.md')
+                  # Only allowed subdirectories
+                  for d in dirs:
+                      if d not in allowed_subdirs:
+                          errors.append(f'{root}/{d}: unexpected subdirectory (allowed: {sorted(allowed_subdirs)})')
+
+          if errors:
+              for e in errors:
+                  print(f'ERROR: {e}', file=sys.stderr)
+              sys.exit(1)
+          print('Skill directory layout OK')
+          EOF
