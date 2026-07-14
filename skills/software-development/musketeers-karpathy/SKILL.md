@@ -3,6 +3,12 @@ name: musketeers-karpathy
 description: "Behavioral guidelines to reduce common LLM coding mistakes — think before coding, simplicity first, surgical changes, goal-driven execution. Apply on every task before decomposing, coding, or reviewing."
 version: 1.0.0
 tags: [musketeers, guidelines, discipline, quality]
+author: Hermes Agent
+license: MIT
+metadata:
+  hermes:
+    tags: [musketeers, guidelines, discipline, quality]
+    related_skills: [plan, requesting-code-review, musketeers-review]
 ---
 
 # Karpathy Guidelines

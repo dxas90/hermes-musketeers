@@ -3,6 +3,12 @@ name: musketeers-review
 description: "Multi-reviewer parallel code review across quality dimensions (security, performance, architecture, testing, accessibility). Load when the user asks for a code review or '/team-review' style workflow."
 version: 1.0.0
 tags: [musketeers, review, athos, code-quality, parallel]
+author: Hermes Agent
+license: MIT
+metadata:
+  hermes:
+    tags: [musketeers, review, athos, code-quality, parallel]
+    related_skills: [musketeers-debug, musketeers-feature, musketeers-orchestration, requesting-code-review]
 ---
 
 # Musketeers Multi-Reviewer Code Review

@@ -3,6 +3,12 @@ name: musketeers-workspace
 description: "Create and manage long-running task workspaces for cross-codebase work. Use when starting bulk operations, cross-repo tasks, or resuming multi-session work that shouldn't pollute repo git histories."
 version: 1.0.0
 tags: [musketeers, workspace, orchestration, cross-repo]
+author: Hermes Agent
+license: MIT
+metadata:
+  hermes:
+    tags: [musketeers, workspace, orchestration, cross-repo]
+    related_skills: [musketeers-orchestration, plan]
 ---
 
 # Agent Workspace Management

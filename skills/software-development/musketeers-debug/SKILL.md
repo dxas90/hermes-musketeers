@@ -3,6 +3,12 @@ name: musketeers-debug
 description: "Hypothesis-driven parallel debugging using Analysis of Competing Hypotheses (ACH). Spawn multiple investigators (Porthos), each assigned one hypothesis. Load when debugging complex issues with multiple potential root causes."
 version: 1.0.0
 tags: [musketeers, debug, porthos, debugging, root-cause]
+author: Hermes Agent
+license: MIT
+metadata:
+  hermes:
+    tags: [musketeers, debug, porthos, debugging, root-cause]
+    related_skills: [systematic-debugging, musketeers-orchestration, musketeers-review]
 ---
 
 # Musketeers Parallel Debugging
