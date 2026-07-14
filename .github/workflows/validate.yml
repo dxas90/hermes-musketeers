@@ -39,6 +39,7 @@ jobs:
           EOF
 
       # ── 3. SKILL.md frontmatter validation ──────────────────────────────────
+      # Rules sourced verbatim from https://agentskills.io/specification
       - name: Validate SKILL.md frontmatter
         run: |
           pip install pyyaml --quiet
@@ -48,7 +49,12 @@ jobs:
           MAX_NAME_LENGTH = 64
           MAX_DESCRIPTION_LENGTH = 1024
           MAX_SKILL_CONTENT_CHARS = 100_000
-          NAME_RE = re.compile(r'^[a-z][a-z0-9-_]*$')
+          MAX_COMPAT_LENGTH = 500
+          BODY_LINE_WARN = 500
+          # agentskills.io/specification: [a-z0-9] and hyphens only, no underscores,
+          # no leading/trailing hyphen, no consecutive hyphens
+          NAME_RE = re.compile(r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?$')
+          CONSEC_HYPHEN = re.compile(r'--')
 
           errors = []
 
@@ -99,10 +105,12 @@ jobs:
                   name = fm.get('name', '')
                   if isinstance(name, str) and name:
                       if len(name) > MAX_NAME_LENGTH:
-                          errors.append(f'{path}: name "{name}" exceeds {MAX_NAME_LENGTH} chars ({len(name)})')
+                          errors.append(f'{path}: name exceeds {MAX_NAME_LENGTH} chars ({len(name)})')
                       if not NAME_RE.match(name):
-                          errors.append(f'{path}: name "{name}" must be lowercase letters/digits/hyphens/underscores')
-                      # directory name should match skill name
+                          errors.append(f'{path}: name "{name}" invalid — spec allows [a-z0-9-] only, no underscores, no leading/trailing hyphen')
+                      if CONSEC_HYPHEN.search(name):
+                          errors.append(f'{path}: name "{name}" contains consecutive hyphens (--)')
+                      # directory name must match skill name (agentskills.io spec)
                       skill_dir = os.path.basename(root)
                       if skill_dir != name:
                           errors.append(f'{path}: directory "{skill_dir}" does not match skill name "{name}"')
@@ -112,7 +120,12 @@ jobs:
                   if isinstance(desc, str) and len(desc) > MAX_DESCRIPTION_LENGTH:
                       errors.append(f'{path}: description exceeds {MAX_DESCRIPTION_LENGTH} chars ({len(desc)})')
 
-                  # ── metadata.hermes block
+                  # ── compatibility length (optional field, max 500)
+                  compat = fm.get('compatibility', '')
+                  if compat and isinstance(compat, str) and len(compat) > MAX_COMPAT_LENGTH:
+                      errors.append(f'{path}: compatibility exceeds {MAX_COMPAT_LENGTH} chars ({len(compat)})')
+
+                  # ── metadata.hermes block (Hermes-specific extension inside metadata)
                   meta = fm.get('metadata')
                   if not isinstance(meta, dict) or 'hermes' not in meta:
                       errors.append(f'{path}: missing metadata.hermes block')
@@ -137,6 +150,11 @@ jobs:
                   # ── Total file size
                   if len(content) > MAX_SKILL_CONTENT_CHARS:
                       errors.append(f'{path}: file size {len(content)} chars exceeds {MAX_SKILL_CONTENT_CHARS} limit')
+
+                  # ── Body line count (agentskills.io recommends < 500 lines)
+                  body_lines = content[m.end():].count('\n')
+                  if body_lines > BODY_LINE_WARN:
+                      errors.append(f'{path}: body is {body_lines} lines (spec recommends < {BODY_LINE_WARN})')
 
           if errors:
               for e in errors:
