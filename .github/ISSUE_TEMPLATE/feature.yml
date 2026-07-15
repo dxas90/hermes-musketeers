@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a new skill, workflow improvement, or profile change.
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should the profile be able to do?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How would you verify this is done?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, related skills, prior art (e.g. other Hermes profiles).

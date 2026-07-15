@@ -119,6 +119,11 @@ Or load a skill explicitly:
 
 ```
 ~/.hermes/profiles/musketeers/
+├── AGENTS.md                        # Agent instructions for repo work
+├── .hermes.md                       # Per-turn coordinator routing rules
+├── CONTRIBUTING.md                  # Setup, rules, PR workflow
+├── SECURITY.md                      # Security policy
+├── CHANGELOG.md                     # Version history
 ├── distribution.yaml                # Distribution manifest
 ├── SOUL.md                          # Dumas persona — the orchestrator identity
 ├── config.yaml                      # Model, provider, delegation settings
