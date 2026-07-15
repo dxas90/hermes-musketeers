@@ -6,13 +6,6 @@ fallback_providers: []
 credential_pool_strategies: {}
 toolsets:
   - hermes-cli
-  - file
-  - terminal
-  - skills
-  - web
-  - delegation
-  - session_search
-  - todo
 max_concurrent_sessions: null
 agent:
   max_turns: 60
@@ -543,7 +536,23 @@ session_reset:
 group_sessions_per_user: true
 platform_toolsets:
   cli:
-    - hermes-cli
+    - browser
+    - clarify
+    - code_execution
+    - computer_use
+    - cronjob
+    - delegation
+    - file
+    - image_gen
+    - kanban
+    - memory
+    - session_search
+    - skills
+    - terminal
+    - todo
+    - tts
+    - vision
+    - web
   telegram:
     - hermes-telegram
   discord:
