@@ -6,6 +6,13 @@ fallback_providers: []
 credential_pool_strategies: {}
 toolsets:
   - hermes-cli
+  - file
+  - terminal
+  - skills
+  - web
+  - delegation
+  - session_search
+  - todo
 max_concurrent_sessions: null
 agent:
   max_turns: 60
@@ -337,15 +344,15 @@ memory:
   nudge_interval: 10
   flush_min_turns: 6
 delegation:
-  model: ''
-  provider: ''
+  model: claude-haiku-4-5-20251001
+  provider: anthropic
   base_url: ''
   api_key: ''
   api_mode: ''
   inherit_mcp_toolsets: true
   max_iterations: 50
   child_timeout_seconds: 900
-  reasoning_effort: high
+  reasoning_effort: medium
   max_concurrent_children: 3
   max_spawn_depth: 1
   orchestrator_enabled: true

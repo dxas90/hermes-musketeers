@@ -9,4 +9,4 @@ Git safety rules (from opsy-bag): No force push, no push to protected branches (
 Credential security: Verify .gitignore covers .env/secrets/keys BEFORE creating such files. Scan staged changes for passwords/tokens/keys before committing. If credentials committed: rotate immediately, then clean history.
 
 §
-Full skill list in this profile: musketeers-karpathy, musketeers-orchestration, musketeers-review, musketeers-debug, musketeers-feature, musketeers-docs, musketeers-workspace, systematic-debugging, requesting-code-review, plan, jira-cli. Always scan with skills_list before starting a task.
+Full skill list in this profile: musketeers-karpathy, musketeers-orchestration, musketeers-review, musketeers-debug, musketeers-feature, musketeers-docs, musketeers-workspace, musketeers-scope-router, musketeers-explore-first, musketeers-ship-gate, musketeers-context-budget, systematic-debugging, requesting-code-review, plan, jira-cli, industry-security-standards. Always scan with skills_list before starting a task.

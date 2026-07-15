@@ -24,6 +24,13 @@ And six ready-to-use workflow skills:
 - **`musketeers-feature`** — parallel feature development with file ownership
 - **`musketeers-docs`** — documentation generation via DArtagnan
 
+Plus workflow phase skills (ported from heavy-coder patterns):
+
+- **`musketeers-scope-router`** — route every request to the cheapest team path before spawning
+- **`musketeers-explore-first`** — batch ground-truth reads before any delegation
+- **`musketeers-ship-gate`** — completion gate with real exit codes before declaring done
+- **`musketeers-context-budget`** — token discipline: batch I/O, cap logs, phase-only skill loading
+
 Plus complementary skills:
 
 | Skill | Description |
@@ -33,6 +40,7 @@ Plus complementary skills:
 | **`plan`** | upfront decomposition before implementation |
 | **`jira-cli`** | Atlassian/Jira CLI reference (acli commands, JQL, transitions) |
 | **`musketeers-workspace`** | cross-repo task tracking |
+| **`industry-security-standards`** | OWASP/NIST/CIS/SLSA/GDPR security standards for Go/K8s services |
 
 ## Requirements
 
@@ -125,12 +133,17 @@ Or load a skill explicitly:
 │   │   ├── musketeers-debug/        # Hypothesis debugging (Porthos)
 │   │   ├── musketeers-feature/      # Parallel builds (Aramis)
 │   │   ├── musketeers-docs/         # Documentation (DArtagnan)
+│   │   ├── musketeers-scope-router/ # Route request to cheapest team path
+│   │   ├── musketeers-explore-first/ # Ground truth before delegation
+│   │   ├── musketeers-ship-gate/    # Completion gate with real evidence
+│   │   ├── musketeers-context-budget/ # Token discipline for coordinators
 │   │   ├── requesting-code-review/  # Pre-commit review
 │   │   ├── systematic-debugging/    # Root cause analysis
 │   │   └── plan/                    # Plan-before-build
 │   ├── devops/
 │   │   ├── musketeers-orchestration/ # Team composition & coordination
-│   │   └── musketeers-workspace/    # Cross-repo task tracking
+│   │   ├── musketeers-workspace/     # Cross-repo task tracking
+│   │   └── industry-security-standards/ # OWASP/NIST/CIS/SLSA/GDPR rules
 │   └── productivity/
 │       └── jira-cli/
 ├── cron/
@@ -140,7 +153,7 @@ Or load a skill explicitly:
 ## Contributing
 
 1. Fork the repo and create a `feat/<description>` branch.
-2. Make your changes. Skill files must have valid YAML frontmatter (`name`, `description`, `version`, `tags`).
+2. Make your changes. Skill files must have valid YAML frontmatter (`name`, `description`, `version`, `author`, `license`) with tags under `metadata.hermes.tags` — not a top-level `tags:` field.
 3. Test skill changes by loading them in a live session: `/skill <name>`
 4. Open a PR against `main` — CI validates YAML and frontmatter automatically.
 

@@ -42,11 +42,40 @@ Patterns for composing, coordinating, and communicating within multi-agent teams
 
 Use `delegate_task` to spawn teammates as subagents:
 
+### Six-Section Context Contract
+
+Every `delegate_task` context must include all six sections. Delegates have no
+memory of your conversation — missing sections cause wrong-file edits and false
+"tests passed" summaries.
+
+```
+1. Repo root: <absolute path>, branch: <name>, status: clean/dirty (<git status -sb>)
+2. Task contract: What "done" means in one paragraph. Out-of-scope bullets.
+3. Touch map: Exact paths + symbols to read/change (path:line anchors, ≤10 entries).
+4. Evidence bar: Exact commands delegates must run before claiming done.
+5. Constraints: No commits unless asked. Honor AGENTS.md / style files. No secrets.
+6. Return format: Changed file list, commands run with exit codes, blockers.
+```
+
+Cap per-delegate context at ~3,000 characters. See `musketeers-context-budget`.
+
 ### Athos (Reviewer)
 ```
 delegate_task(
   goal="Review {target} for {dimension} issues. Produce structured findings with file:line citations, severity (Critical/High/Medium/Low), evidence, impact, and recommended fix.",
-  context="Dimension: {security|performance|architecture|testing|accessibility}\nTarget files: {file list}\nDiff content: {diff}\nOutput format: ### [SEVERITY] Title\n**Location**: file:line\n**Severity**: ...\n**Evidence**: ...\n**Impact**: ...\n**Recommended Fix**: ...",
+  context="""
+1. Repo root: {path}, branch: {branch}
+2. Task contract: Review for {dimension} only. Do not implement fixes.
+3. Touch map: {file list with path:line}
+4. Evidence bar: Read each file; cite line numbers for every finding.
+5. Constraints: Read-only. Do not modify files.
+6. Return format:
+   ### [SEVERITY] Title
+   **Location**: file:line
+   **Evidence**: ...
+   **Impact**: ...
+   **Recommended Fix**: ...
+""",
   toolsets=["terminal", "file", "web"]
 )
 ```
@@ -54,8 +83,18 @@ delegate_task(
 ### Porthos (Debugger)
 ```
 delegate_task(
-  goal="Investigate hypothesis: '{hypothesis}'. Gather evidence to confirm or falsify. Report confidence level (High >80%, Medium 50-80%, Low <50%) with file:line citations and causal chain.",
-  context="Bug symptoms: {description}\nScope: {files|module|project}\nHypothesis: {statement}\nEvidence criteria:\n  Confirming: {what would prove it}\n  Falsifying: {what would disprove it}",
+  goal="Investigate hypothesis: '{hypothesis}'. Gather evidence to confirm or falsify. Report confidence (High >80%, Medium 50-80%, Low <50%) with file:line citations and causal chain.",
+  context="""
+1. Repo root: {path}, branch: {branch}
+2. Task contract: Confirm or falsify this hypothesis only. Do not fix.
+3. Touch map: {relevant files + error location path:line}
+4. Evidence bar: Run repro command; capture exit code + ≤80 lines output.
+   Repro: {exact command}
+   Confirming evidence: {what would prove it}
+   Falsifying evidence: {what would disprove it}
+5. Constraints: Read-only preferred. No commits.
+6. Return format: Confidence level, evidence list with path:line, causal chain.
+""",
   toolsets=["terminal", "file"]
 )
 ```
@@ -64,7 +103,16 @@ delegate_task(
 ```
 delegate_task(
   goal="Implement {component}. Work ONLY within owned files. Follow interface contracts at boundaries.",
-  context="Owned files/dirs: {list}\nInterface contracts: {types/signatures}\nAcceptance criteria: {verifiable checks}\nExisting patterns to follow: {conventions}\nDO NOT modify: {excluded files}",
+  context="""
+1. Repo root: {path}, branch: {branch}, status: {git status -sb}
+2. Task contract: Implement {component}. Out of scope: {exclusions}.
+3. Touch map: Owned files/dirs: {list with path:line anchors}.
+   Interface contracts: {types/signatures at boundaries}.
+   DO NOT modify: {excluded files}.
+4. Evidence bar: {test command from AGENTS.md/manifest}. Must exit 0.
+5. Constraints: No commits unless asked. Match existing style. No secrets.
+6. Return format: Changed file list, commands run with exit codes, blockers.
+""",
   toolsets=["terminal", "file", "web"]
 )
 ```
@@ -73,7 +121,14 @@ delegate_task(
 ```
 delegate_task(
   goal="Write {doc_type} documentation for {subject}. Read source files directly — do not invent APIs.",
-  context="Doc type: {README|API Reference|Architecture|Setup Guide|Troubleshooting}\nSource files to read: {list}\nAudience: {new contributors|integrators|operators}\nOutput location: {path}",
+  context="""
+1. Repo root: {path}, branch: {branch}
+2. Task contract: Write {doc_type} for {audience}. Output to {path}.
+3. Touch map: Source files to read: {list with path:line}.
+4. Evidence bar: All APIs/types cited from actual source, not invented.
+5. Constraints: Read source before writing. No code changes.
+6. Return format: Output file path, source files read, any gaps found.
+""",
   toolsets=["terminal", "file"]
 )
 ```
@@ -109,11 +164,16 @@ Task A ─┤          ├→ Task D
 
 ### Result Synthesis
 After all delegates complete:
-1. **Deduplicate** — Merge findings about the same location/issue
-2. **Resolve conflicts** — When agents disagree, use higher severity
-3. **Prioritize** — Group by severity (Critical → High → Medium → Low)
-4. **Cross-reference** — Note findings that span multiple dimensions
-5. **Gap analysis** — Identify areas with insufficient coverage
+1. **Collect** — Gather each delegate summary; extract file lists, commands, exit codes.
+2. **Score on evidence** — Test evidence > scope discipline > regression risk > maintainability. Ignore eloquence.
+3. **Choose spine** — One candidate (or approach) owns the base diff.
+4. **Cherry-pick hunks** — Import only hunks with independent evidence (test or cited path:line reason).
+5. **Deduplicate** — Merge findings about the same location/issue across delegates.
+6. **Resolve conflicts** — When delegates disagree, use higher severity / stronger evidence.
+7. **Prioritize** — Group by severity (Critical → High → Medium → Low).
+8. **Re-read before apply** — `read_file` every file you will touch after mental merge.
+9. **Gap analysis** — Identify areas with insufficient coverage; note explicitly.
+10. **Gate** — Run `musketeers-ship-gate` before declaring done.
 
 ## Error Handling & Retry Patterns
 

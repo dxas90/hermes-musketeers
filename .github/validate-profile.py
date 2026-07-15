@@ -18,7 +18,7 @@ except ImportError:  # pragma: no cover - depends on environment
 
 
 ROOT = Path(__file__).resolve().parent.parent
-REQUIRED_SKILL_FRONTMATTER = {"name", "description", "version", "tags"}
+REQUIRED_SKILL_FRONTMATTER = {"name", "description", "version", "author", "license"}
 SECRET_PATTERN = re.compile(
     r"(api_key|secret|password|token)\s*=\s*['\"][^'\"]{8,}['\"]",
     re.IGNORECASE,
@@ -46,7 +46,7 @@ def check_yaml_files() -> bool:
 
 
 def check_skill_frontmatter() -> bool:
-    """Ensure every SKILL.md has required YAML frontmatter."""
+    """Ensure every SKILL.md has required YAML frontmatter (mirrors CI checks)."""
     errors: list[str] = []
     skills_dir = ROOT / "skills"
     skill_files = list(skills_dir.rglob("SKILL.md"))
@@ -59,14 +59,55 @@ def check_skill_frontmatter() -> bool:
         if not match:
             errors.append(f"{path}: malformed frontmatter")
             continue
-        frontmatter = match.group(1)
-        found = set(re.findall(r"^(\w+):", frontmatter, re.MULTILINE))
-        if "tags" not in found and "metadata" in found:
-            if re.search(r"hermes:\s*\n\s+tags:", frontmatter):
-                found.add("tags")
+        frontmatter_raw = match.group(1)
+
+        # Parse with yaml if available, else fall back to regex
+        if yaml is not None:
+            try:
+                fm = yaml.safe_load(frontmatter_raw)
+            except Exception as exc:
+                errors.append(f"{path}: frontmatter YAML parse error: {exc}")
+                continue
+            if not isinstance(fm, dict):
+                errors.append(f"{path}: frontmatter is not a YAML mapping")
+                continue
+            found = set(fm.keys())
+        else:
+            found = set(re.findall(r"^(\w+):", frontmatter_raw, re.MULTILINE))
+            fm = None
+
         missing = REQUIRED_SKILL_FRONTMATTER - found
         if missing:
             errors.append(f"{path}: missing fields: {missing}")
+
+        # top-level tags: is wrong per spec — must be metadata.hermes.tags
+        if "tags" in found:
+            errors.append(f"{path}: top-level 'tags:' found — move to metadata.hermes.tags")
+
+        # metadata.hermes.tags must exist and be a non-empty list
+        if yaml is not None and fm is not None:
+            meta = fm.get("metadata")
+            if not isinstance(meta, dict) or "hermes" not in meta:
+                errors.append(f"{path}: missing metadata.hermes block")
+            else:
+                hermes_meta = meta["hermes"]
+                tags = hermes_meta.get("tags") if isinstance(hermes_meta, dict) else None
+                if not tags or not isinstance(tags, list):
+                    errors.append(f"{path}: metadata.hermes.tags must be a non-empty list")
+        else:
+            # regex fallback: look for hermes: block with tags
+            if not re.search(r"hermes:\s*\n\s+tags:", frontmatter_raw):
+                errors.append(f"{path}: missing metadata.hermes.tags block")
+
+        # directory name must match skill name field
+        skill_dir_name = path.parent.name
+        if yaml is not None and fm is not None:
+            skill_name = fm.get("name", "")
+        else:
+            m2 = re.search(r"^name:\s*(.+)$", frontmatter_raw, re.MULTILINE)
+            skill_name = m2.group(1).strip() if m2 else ""
+        if skill_name and skill_dir_name != skill_name:
+            errors.append(f"{path}: directory '{skill_dir_name}' does not match skill name '{skill_name}'")
 
     if errors:
         for error in errors:
