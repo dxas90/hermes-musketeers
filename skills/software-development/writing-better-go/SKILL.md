@@ -5,7 +5,6 @@ description: Use when writing or reviewing Go code. GoLab 2025 rules.
 version: 2.0.0
 author: Dumas
 license: internal
-tags: [go, golang, code-quality, code-review, best-practices, modern-go]
 metadata:
   hermes:
     tags: [go, golang, code-quality, code-review, best-practices, modern-go]
@@ -48,8 +47,6 @@ grep -rh "^go " --include="go.mod" . 2>/dev/null | cut -d' ' -f2 | sort | uniq -
 **If unknown:** Ask: “Which Go version should I target?” with options [1.23] / [1.24] / [1.25] / [1.26].
 
 Never use features from a newer Go version than the target. Never use outdated patterns when a modern alternative is available.
-
----
 
 ### Go Version Feature Reference
 
@@ -170,35 +167,24 @@ if pathErr, ok := errors.AsType[*os.PathError](err); ok {
 
 ## Part B — Production Quality Rules (GoLab 2025)
 
----
-
 ## Rule 01 — Handle Errors
 
 **Never discard, ignore, or swallow errors.**
 
 ```go
-// BAD: silently discarding
+// BAD: silently discarding (use _ to ignore)
 result, _ := pickRandom(input)
 
-// BAD: silently ignoring
+// BAD: swallowing — return nil hides the error from the caller
 result, err := pickRandom(input)
+if err != nil { return nil }
+
+// GOOD: wrap and propagate
 if err != nil {
-    // empty — does nothing
+    return fmt.Errorf("pickRandom failed: %w", err)
 }
 
-// BAD: swallowing (nil return hides the error)
-result, err := pickRandom(input)
-if err != nil {
-    return nil   // caller sees nothing wrong
-}
-
-// GOOD: return it, or log it — never both
-result, err := pickRandom(input)
-if err != nil {
-    return fmt.Errorf("pickRandom failed: %w", err)  // wrap + propagate
-}
-
-// GOOD: log only when you cannot propagate
+// GOOD: log only at the boundary where you cannot propagate
 if err != nil {
     slog.Error("pickRandom failed", "error", err)
     return nil
@@ -223,8 +209,6 @@ if err != nil {
 }
 ```
 Log it **or** return it. Not both.
-
----
 
 ## Rule 02 — Don't Add Interfaces Too Soon
 
@@ -264,8 +248,6 @@ userService := fakeuserservice.New(
 - Introduce interfaces only when multiple interchangeable types are genuinely needed.
 - Some deps (Postgres, Kafka, BigQuery) have no good fake — an interface is acceptable there.
 
----
-
 ## Rule 03 — Mutexes Before Channels
 
 Channels are expressive but easy to misuse. Common panics/deadlocks:
@@ -301,20 +283,8 @@ for _, v := range input {
         return nil
     })
 }
-if err := g.Wait(); err != nil {
-    return 0, err
-}
-
-// EVEN BETTER: pre-allocate by index — no mutex at all
-resps := make([]int, len(input))
-for i, v := range input {
-    g.Go(func() error {
-        resp, err := process(ctx, v)
-        if err != nil { return err }
-        resps[i] = resp   // safe: each goroutine writes a unique index
-        return nil
-    })
-}
+if err := g.Wait(); err != nil { return 0, err }
+// TIP: pre-allocate resps := make([]int, len(input)) and write by index to avoid the mutex entirely.
 ```
 
 ---
@@ -371,31 +341,15 @@ func selectNotifications(req *pb.Request) {
 
 ### Check Nil Before Dereferencing Pointer Fields
 ```go
-// BAD
-scores += *item.Score   // panics if Score is nil
-
-// GOOD — explicit nil check
+scores += *item.Score          // BAD: panics if Score is nil
 if item.Score == nil { continue }
-scores += *item.Score
-
-// BEST — design away the pointer
-type FeedItem struct {
-    Score float64  // zero value is safe; no pointer needed
-}
+scores += *item.Score          // GOOD: explicit nil guard
 ```
+Best: design away the pointer entirely (`Score float64` — zero value is safe).
+Never pass `*db` where `db` is a pointer — pass `db` directly.
 
-**When to check vs. when not to:**
-- Check inputs from outside (HTTP requests, external stores, protobuf).
-- Do NOT litter code with `if x == nil` when you control the flow.
-- Error handling is your contract; don't duplicate it with redundant nil checks.
-- Pass the pointer itself to avoid accidental dereference:
-```go
-// BAD: *db panics if db is nil
-job := cron.NewJob("indexer", *db)
-
-// GOOD
-job := cron.NewJob("indexer", db)
-```
+**When to check:** external inputs (HTTP, protobuf, external stores).
+**When NOT to:** internal flow you control — use error returns as your contract, not nil checks.
 
 ---
 
@@ -425,28 +379,7 @@ if !check() {
 process()
 ```
 
-Inside loops: use `continue` as a guard instead of nesting the body inside an `if`.
-
-```go
-// BAD
-for _, item := range items {
-    if item.Queries != nil {
-        // 10 lines deep
-    }
-}
-
-// GOOD
-for _, item := range items {
-    if item.Queries == nil {
-        continue
-    }
-    // flat code here
-}
-```
-
-When a loop body is still complex after flattening, extract a helper function.
-
----
+Inside loops: use `continue` as a guard — `if item.Queries == nil { continue }` — instead of nesting the entire body inside an `if`. When still complex after flattening, extract a helper function.
 
 ## Rule 07 — Avoid Catch-All Packages and Files
 
@@ -486,7 +419,7 @@ func trimLeftByte(s string, c byte) string { ... }   // helpers follow
 func trimRightUnicode(s, cutset string) string { ... }
 ```
 
-In test files: put `TestXxx` functions before mock/helper types they depend on.
+In test files: put `TestXxx` before the mock/helper types they depend on.
 
 ---
 
@@ -510,20 +443,11 @@ inject    func()
 - The bigger the gap between declaration and use, the more descriptive the name should be.
 
 ### Package + Exported Identifier Pairing
-Think about how the call site reads:
-```go
-// BAD: redundant or confusing at call site
-test.NewDatabaseFromFile(...)     // vague package name
-common.SeekStart                  // "common" communicates nothing
-helper.Marshal(...)               // what does helper marshal?
-consumer.NewConsumerHandler(...)  // stutter — package repeats in name
-
-// GOOD
-spannertest.NewDatabaseFromFile(...)
-io.SeekStart
-elliptic.Marshal(curve, x, y)
-consumer.NewHandler(...)
-```
+Name packages after their domain; think how the call site reads:
+- `test.NewDatabase` → `spannertest.NewDatabaseFromFile` (specific package name)
+- `common.SeekStart` → `io.SeekStart` (package communicates meaning)
+- `helper.Marshal` → `elliptic.Marshal(curve, x, y)` (domain-named package)
+- `consumer.NewConsumerHandler` → `consumer.NewHandler` (no stutter)
 
 ---
 
@@ -532,15 +456,13 @@ consumer.NewHandler(...)
 Readers can see **what** the code does. They struggle to understand **why** it exists.
 
 ```go
-// BAD: restates the code
+// BAD: restates the code — readers can already see what it does
 // Escapes internal double quotes by replacing `"` with `\"`.
-func EscapeDoubleQuotes(s string) string { ... }
 
-// GOOD: explains the motivation
-// We can sometimes receive a label like: ""How-To"" because the frontend
-// wraps user-provided labels in quotes, even when the value itself
-// contains literal `"` characters. In this case, attempt to escape all
-// internal double quotes, leaving only the outermost ones unescaped.
+// GOOD: explains why it exists
+// Frontend wraps user labels in quotes even when the value itself contains
+// literal `"` chars, producing labels like ""How-To"". Escape all internal
+// double quotes, leaving only the outermost ones unescaped.
 func EscapeDoubleQuotes(s string) string { ... }
 ```
 

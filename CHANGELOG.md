@@ -7,6 +7,13 @@ Entries: Added / Changed / Fixed / Removed
 
 ---
 
+## 1.2.1 — 2026-10-01
+
+### Fixed
+- `writing-better-go` — removed top-level `tags:` field (must live in `metadata.hermes.tags` only); trimmed body from 573 to 498 lines to satisfy the 500-line spec limit. No content changes beyond tightening verbose code examples.
+
+---
+
 ## 1.2.0 — 2026-07-15
 
 ### Added
